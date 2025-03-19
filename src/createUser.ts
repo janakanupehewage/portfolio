@@ -5,8 +5,8 @@ import User from '@/models/user';  // Adjust this import path if needed
 const createUser = async () => {
   try {
     await connectDB(); // Ensure DB connection before inserting user
-    const username = 'janakanupehewage02@gmail.com'; // Change to the desired username
-    const password = 'jana#1999'; // Change to the desired password
+    const username = ''; // Change to the desired username
+    const password = ''; // Change to the desired password
 
     // Hash the password
     const salt = await bcrypt.genSalt(10);
