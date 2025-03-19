@@ -33,7 +33,7 @@ function Hero() {
   return (
     <div className="relative flex flex-col h-full w-full">
       <video
-        ref={videoRef}
+        //ref={videoRef}
         autoPlay
         loop
         muted
