@@ -37,10 +37,11 @@ function Hero() {
         autoPlay
         loop
         muted
-        className="absolute top-[-440px] left-0 z-[1] w-full h-full object-cover"
+        className="absolute top-[-440px] left-0 w-full h-full object-cover z-[-1]"
       >
         <source src="/blackhole.webm" type="video/webm" />
       </video>
+      
       <HeroContent />
     </div>
   );
