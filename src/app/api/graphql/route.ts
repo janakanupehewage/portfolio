@@ -9,6 +9,37 @@ import { uploadImage } from '@/libs/cloudinary'; // Import the uploadImage funct
 import { GraphQLError } from 'graphql';
 
 connectDB();
+
+// Define types for the arguments in each resolver
+
+interface RegisterArgs {
+  username: string;
+  password: string;
+}
+
+interface LoginArgs {
+  username: string;
+  password: string;
+}
+
+interface AddProjectArgs {
+  title: string;
+  description?: string;
+  image: string;
+}
+
+interface UpdateProjectArgs {
+  id: string;
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+interface DeleteProjectArgs {
+  id: string;
+}
+
+
 // Define GraphQL Schema
 const typeDefs = `
   type User {
@@ -56,7 +87,7 @@ const resolvers = {
   },
 
   Mutation: {
-    register: async (_: any, { username, password }: { username: string; password: string }) => {
+    register: async (_: unknown, { username, password }: RegisterArgs) => {
       await connectDB();
       const existingUser = await User.findOne({ username });
 
@@ -82,7 +113,7 @@ const resolvers = {
       return { id: newUser._id, username: newUser.username, token };
     },
 
-    login: async (_: any, { username, password }: { username: string; password: string }) => {
+    login: async (_: unknown, { username, password }: LoginArgs) => {
       await connectDB();
       const user = await User.findOne({ username });
 
@@ -113,7 +144,7 @@ const resolvers = {
       return { id: user._id, username: user.username, token };
     },
 
-    addProject: async (_: any, { title, description, image }: { title: string; description?: string; image: string }) => {
+    addProject: async (_: unknown, { title, description, image }: AddProjectArgs) => {
       //await connectDB();
       const imageResult = await uploadImage(image);
       
@@ -127,7 +158,7 @@ const resolvers = {
       return newProject;
     },
 
-    updateProject: async (_: any, { id, title, description, image }: { id: string; title?: string; description?: string; image?: string }) => {
+    updateProject: async (_: unknown, { id, title, description, image }: UpdateProjectArgs) => {
       await connectDB();
       let imageUrl = undefined;
 
@@ -143,7 +174,7 @@ const resolvers = {
       );
     },
 
-    deleteProject: async (_: any, { id }: { id: string }) => {
+    deleteProject: async (_: unknown, { id }: DeleteProjectArgs) => {
       await connectDB();
       await Project.findByIdAndDelete(id);
       return "Project deleted successfully!";
