@@ -1,16 +1,14 @@
+import { NextRequest, NextResponse } from 'next/server';
 import { createYoga } from 'graphql-yoga';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { connectDB } from '@/libs/mongodb'; // Ensure DB connection
-import User from '@/models/user'; // User model
-import Project from '@/models/project'; // Project model
-import { uploadImage } from '@/libs/cloudinary'; // Import the uploadImage function
-import { GraphQLError } from 'graphql';
+import { connectDB } from '@/libs/mongodb';
+import User from '@/models/user';
+import Project from '@/models/project';
+import { uploadImage } from '@/libs/cloudinary';
 
 connectDB();
-
-// Define types for the arguments in each resolver
 
 interface RegisterArgs {
   username: string;
@@ -39,8 +37,6 @@ interface DeleteProjectArgs {
   id: string;
 }
 
-
-// Define GraphQL Schema
 const typeDefs = `
   type User {
     id: ID!
@@ -58,7 +54,6 @@ const typeDefs = `
   type Query {
     testConnection: String
     projects: [Project]
-    
   }
 
   type Mutation {
@@ -70,121 +65,108 @@ const typeDefs = `
   }
 `;
 
-// Define Resolvers
 const resolvers = {
   Query: {
-    testConnection: async () => {
-      try {
-        
-        return "Database connected successfully!";
-      } catch (error) {
-        console.error("Database connection failed:", error);
-        return "Database connection failed!";
-      }
-    },
+    testConnection: async () => "Database connected successfully!",
     projects: async () => await Project.find(),
-    //fetchProjects: async () => await Project.find(),
   },
-
   Mutation: {
     register: async (_: unknown, { username, password }: RegisterArgs) => {
-      await connectDB();
       const existingUser = await User.findOne({ username });
+      if (existingUser) throw new Error("Username already exists");
 
-      if (existingUser) {
-        throw new Error("Username already exists");
-      }
-
-      // Hash password
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      // Create and save user
       const newUser = new User({ username, password: hashedPassword });
       await newUser.save();
 
-      // Generate JWT token
-      const token = jwt.sign(
-        { userId: newUser._id, username: newUser.username },
-        process.env.JWT_SECRET || 'your_jwt_secret',
-        { expiresIn: '1h' }
-      );
+      const token = jwt.sign({ userId: newUser._id, username: newUser.username }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
 
       return { id: newUser._id, username: newUser.username, token };
     },
-
     login: async (_: unknown, { username, password }: LoginArgs) => {
-      await connectDB();
       const user = await User.findOne({ username });
-
-      if (!user) {
-        const errorMessage = "User not found";
-        console.error(`[LOGIN ERROR]: ${errorMessage} for username: ${username}`);
-        throw new GraphQLError(errorMessage, {
-          extensions: { code: "USER_NOT_FOUND" },
-        });
-      }
+      if (!user) throw new Error("User not found");
 
       const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        const errorMessage = "Invalid credentials";
-        console.error(`[LOGIN ERROR]: ${errorMessage} for username: ${username}`);
-        throw new GraphQLError(errorMessage, {
-          extensions: { code: "INVALID_CREDENTIALS" },
-        });
-      }
+      if (!isMatch) throw new Error("Invalid credentials");
 
-      // Generate JWT token
-      const token = jwt.sign(
-        { userId: user._id, username: user.username },
-        process.env.JWT_SECRET || 'your_jwt_secret',
-        { expiresIn: '1h' }
-      );
+      const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
 
       return { id: user._id, username: user.username, token };
     },
-
     addProject: async (_: unknown, { title, description, image }: AddProjectArgs) => {
-      //await connectDB();
       const imageResult = await uploadImage(image);
-      
       const newProject = new Project({
         title,
         description,
         imageUrl: imageResult.secure_url,
       });
-
       await newProject.save();
       return newProject;
     },
-
     updateProject: async (_: unknown, { id, title, description, image }: UpdateProjectArgs) => {
-      await connectDB();
       let imageUrl = undefined;
-
       if (image) {
         const imageResult = await uploadImage(image);
         imageUrl = imageResult.secure_url;
       }
-
-      return await Project.findByIdAndUpdate(
-        id,
-        { title, description, imageUrl },
-        { new: true }
-      );
+      return await Project.findByIdAndUpdate(id, { title, description, imageUrl }, { new: true });
     },
-
     deleteProject: async (_: unknown, { id }: DeleteProjectArgs) => {
-      await connectDB();
       await Project.findByIdAndDelete(id);
       return "Project deleted successfully!";
     },
   },
 };
 
-// Create GraphQL API
-const schema = makeExecutableSchema({ typeDefs, resolvers });
-const yoga = createYoga({ schema });
+// Function to decode JWT token using jsonwebtoken
+const decodeToken = (token: string) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+    return decoded;
+  } catch (err) {
+    throw new Error('Invalid token');
+  }
+};
 
-// Handle requests
-export { yoga as GET, yoga as POST };
+// Custom Context interface that extends the default context used by yoga
+interface CustomContext {
+  user?: any;
+}
+
+const getContext = (req: NextRequest): CustomContext => {
+  const token = req.headers.get('Authorization')?.split(' ')[1]; // If your token is in the Authorization header
+  const user = token ? decodeToken(token) : null;
+  return { user };
+};
+
+const schema = makeExecutableSchema({ typeDefs, resolvers });
+
+const yoga = createYoga({
+  schema,
+  context: ({ req }: { req: NextRequest }) => {
+    const extendedContext = getContext(req);
+    return extendedContext; // Return the context with user
+  },
+});
+
+export async function GET(req: NextRequest) {
+  const context = { req }; // Provide the context object
+  const response = await yoga.handleRequest(req, context); // Pass both req and context
+  return new NextResponse(response.body, {
+    status: response.status,
+    headers: response.headers,
+  });
+}
+
+export async function POST(req: NextRequest) {
+  const context = { req }; // Provide the context object
+  const response = await yoga.handleRequest(req, context); // Pass both req and context
+  return new NextResponse(response.body, {
+    status: response.status,
+    headers: response.headers,
+  });
+}
+
