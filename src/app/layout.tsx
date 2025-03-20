@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import StarsCanvas from "@/(components)/main/StarBackground";
-import Navbar from "@/(components)/main/Navbar";
-import Footer from "@/(components)/main/Footer";
+//import StarsCanvas from "@/(components)/main/StarBackground";
+//import Navbar from "@/(components)/main/Navbar";
+//import Footer from "@/(components)/main/Footer";
 //import { ApolloProvider, InMemoryCache, ApolloClient } from "@apollo/client";
 
 
