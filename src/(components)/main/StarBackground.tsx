@@ -4,7 +4,7 @@ import React, { Suspense, useMemo, useRef,useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial,Preload } from "@react-three/drei";
 //import CanvasLoader from "../Loader";
-import * as THREE from "three";
+//import * as THREE from "three";
 // @ts-ignore
 import * as random from "maath/random/dist/maath-random.esm";
 

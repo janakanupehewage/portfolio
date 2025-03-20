@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link'; // Make sure to import Link from 'next/link'
 import { Socials } from '../../../constants'; // Ensure Socials array is imported
-import { RxDiscordLogo, RxGithubLogo, RxInstagramLogo, RxLinkedinLogo, RxTwitterLogo } from 'react-icons/rx';
+import { RxInstagramLogo } from 'react-icons/rx';
 import { FaYoutube } from 'react-icons/fa';
 
 const Footer = () => {

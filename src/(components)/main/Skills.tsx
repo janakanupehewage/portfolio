@@ -1,5 +1,5 @@
 import React from 'react'
-import { Backend_skill, Frontend_skill, Full_stack, Other_skill, Skill_data } from '../../../constants'
+import { Backend_skill, Full_stack, Other_skill, Skill_data } from '../../../constants'
 import SkillDataProvider from '../sub/SkillDataProvider'
 import SkillText from '../sub/SkillText'
 
