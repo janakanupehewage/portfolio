@@ -10,6 +10,13 @@ import { uploadImage } from '@/libs/cloudinary';
 
 connectDB();
 
+interface User {
+  id: string;
+  username: string;
+  email?: string; // Optional, adjust according to your model
+  // Add other fields as needed
+}
+
 interface RegisterArgs {
   username: string;
   password: string;
@@ -127,13 +134,15 @@ const decodeToken = (token: string) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
     return decoded;
   } catch (err) {
+    console.error(err);
     throw new Error('Invalid token');
+    
   }
 };
 
 // Custom Context interface that extends the default context used by yoga
 interface CustomContext {
-  user?: any;
+  user?: User;
 }
 
 const getContext = (req: NextRequest): CustomContext => {
