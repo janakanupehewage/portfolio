@@ -10,13 +10,13 @@ This portfolio showcases my skills and expertise as a developer, built using mod
 - **Project Highlights** – Showcases my best work and real-world applications.  
 
 ## Technologies Used  
-- **Frontend:** Next.js, TypeScript, Tailwind CSS, Framer Motion  
-- **Backend:** GraphQL  
-- **Database:** MongoDB Atlas  
+- **Frontend:** Built with Next.js and TypeScript, styled using Tailwind CSS, and enhanced with Framer Motion for smooth animations.  
+- **Backend:** Powered by GraphQL for efficient and flexible data fetching.  
+- **Database:** Utilizes MongoDB Atlas for secure and scalable cloud storage.  
 
 ## Deployment  
 This portfolio is deployed on **Vercel**, ensuring fast load times and seamless performance.  
-🔗 **Live Demo:** [View Portfolio](https://your-portfolio-link.vercel.app/)  
+🔗 **Live Demo:** [View Portfolio](https://janakanupehewageportfolio.vercel.app/)  
 
 ## Contact  
 Explore my work, and let's build something amazing together! 🚀  
